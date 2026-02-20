@@ -47,6 +47,7 @@ func (s *Storage) SaveURL(urlToSave string, alias string) (int64, error) {
 	if err != nil {
 		return 0, fmt.Errorf("%s: %w", op, err)
 	}
+	defer stmt.Close()
 
 	res, err := stmt.Exec(urlToSave, alias)
 	if err != nil {
@@ -72,6 +73,7 @@ func (s *Storage) GetURL(alias string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("%s: prepare statement %w", op, err)
 	}
+	defer stmt.Close()
 
 	var resURL string
 	err = stmt.QueryRow(alias).Scan(&resURL)
