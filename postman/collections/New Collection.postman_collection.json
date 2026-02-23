@@ -1,0 +1,167 @@
+{
+  "info": {
+    "_postman_id": "c064806d-ca72-439e-8803-701ee1a2cbcb",
+    "name": "RedirectTest",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Save",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "id": "f8b1eccd-92a2-4db0-a55a-90e3264711c9",
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "id": "acf5ccc1-edd6-49ba-a0ee-fc251310d636",
+            "exec": [
+              "// Проверка статуса\r",
+              "pm.test(\"Status is 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "\r",
+              "const responseJson = pm.response.json();\r",
+              "const inputAlias = pm.iterationData.get(\"alias\");\r",
+              "const inputUrl = pm.iterationData.get(\"url\");\r",
+              "\r",
+              "let actualAlias;\r",
+              "\r",
+              "if (inputAlias) {\r",
+              "    pm.test(\"Alias matches input\", function () {\r",
+              "        pm.expect(responseJson.alias).to.eql(inputAlias);\r",
+              "    });\r",
+              "\r",
+              "    actualAlias = inputAlias;\r",
+              "\r",
+              "} else {\r",
+              "    pm.test(\"Alias is generated\", function () {\r",
+              "        pm.expect(responseJson.alias).to.not.be.empty;\r",
+              "    });\r",
+              "\r",
+              "    actualAlias = responseJson.alias;\r",
+              "}\r",
+              "\r",
+              "// Сохраняем для следующего запроса\r",
+              "pm.environment.set(\"redirectAlias\", actualAlias);\r",
+              "pm.environment.set(\"originalUrl\", inputUrl);\r",
+              "\r",
+              "// Запускаем redirect-запрос\r",
+              "pm.execution.setNextRequest(\"Redirect\");"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "id": "75bfddd3-4b9f-476f-ac67-8128688dcfd0",
+      "request": {
+        "auth": {
+          "type": "basic",
+          "basic": [
+            {
+              "key": "password",
+              "value": "{{vault:Password}}",
+              "type": "string"
+            },
+            {
+              "key": "username",
+              "value": "ProdUser",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"url\": \"{{$randomUrl}}\",\r\n  \"alias\": \"{{$randomWord}}-{{$randomWord}}\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://176.119.147.141:8082/url",
+          "protocol": "http",
+          "host": [
+            "176",
+            "119",
+            "147",
+            "141"
+          ],
+          "port": "8082",
+          "path": [
+            "url"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Redirect",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "id": "8f1ea7b3-d089-473a-8e9c-9793cc341e79",
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "id": "fbf44964-228a-406c-9cee-c55b2b6c6db3",
+            "exec": [
+              "pm.test(\"Redirect status is 302\", function () {\r",
+              "    pm.response.to.have.status(302);\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "id": "76ae48dc-29aa-4c9d-af83-463fbf12f2ac",
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://176.119.147.141:8082/{{redirectAlias}}",
+          "protocol": "http",
+          "host": [
+            "176",
+            "119",
+            "147",
+            "141"
+          ],
+          "port": "8082",
+          "path": [
+            "{{redirectAlias}}"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}
